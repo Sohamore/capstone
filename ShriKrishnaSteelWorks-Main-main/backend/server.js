@@ -57,20 +57,18 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "ShriKrishna SteelWorks API is running ✅" });
 });
 
-// ─── Start server (only in local development) ─────────────────────────────────
-// Vercel imports this file as a serverless function — do NOT call app.listen() there.
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  }).on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.error(`❌ Port ${PORT} already in use.`);
-    } else {
-      console.error(err);
-    }
-    process.exit(1);
-  });
-}
+// ─── Start server ─────────────────────────────────────────────────────────────
+// Render (and local dev) both need app.listen() to bind a port.
+// Render sets NODE_ENV=production but still requires a running HTTP server.
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+}).on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`❌ Port ${PORT} already in use.`);
+  } else {
+    console.error(err);
+  }
+  process.exit(1);
+});
 
-// ─── Export for Vercel Serverless ─────────────────────────────────────────────
 export default app;
