@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import heroVideo from "../assets/videos/hero-bg.mp4";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Product {
@@ -655,7 +656,7 @@ export default function Home() {
             Then change the src below to: /src/assets/videos/hero-bg.mp4
             ───────────────────────────────────────────────────────────
           */}
-          <source src="/src/assets/videos/hero-bg.mp4" type="video/mp4" />
+          <source src={heroVideo} type="video/mp4" />
         </video>
         <div className="skw-hero-overlay" />
         <div className="skw-grid-lines" aria-hidden="true">
