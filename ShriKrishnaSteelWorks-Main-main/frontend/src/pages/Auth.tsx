@@ -400,7 +400,7 @@ export default function Auth() {
                 )}
 
                 <button type="submit" disabled={authLoading} className={`auth-btn ${authLoading ? "auth-btn--loading" : ""}`}>
-                  {authLoading ? <><span className="auth-spin" /> Processing…</> : <>{mode === "login" ? "Sign In" : "Create Account"}</>}
+                  {authLoading ? <><span className="auth-spin" /> Processing…</> : <>{mode === "login" ? "Sign In" : "Create Account"} <span className="auth-btn-arrow">→</span></>}
                 </button>
 
                 <div className="auth-or"><span>or</span></div>
