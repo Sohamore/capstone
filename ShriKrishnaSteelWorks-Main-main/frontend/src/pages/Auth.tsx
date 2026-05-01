@@ -77,14 +77,7 @@ function VisualPanel() {
         <div className="av-dot av-dot--3" />
       </div>
       <div className="av-brand">
-        <div className="av-logo">
-          <span className="av-logo-glyph">SKW</span>
-          <div className="av-logo-pulse" />
-        </div>
-        <h2 className="av-title">
-          <span className="av-title--main">ShriKrishna</span>
-          <span className="av-title--sub">SteelWorks</span>
-        </h2>
+        <img src="/src/assets/SK-logo.png" alt="ShriKrishna SteelWorks" style={{ maxWidth: "220px", marginBottom: "1rem" }} />
         <div className="av-badge">
           <span className="av-badge-dot" />Customer Portal
         </div>
