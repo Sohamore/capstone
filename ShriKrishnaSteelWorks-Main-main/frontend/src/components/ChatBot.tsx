@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import logoNew from "../assets/SK-logo-new.jpg";
 import "../chatbot-styles.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -531,7 +532,7 @@ export default function ChatBot() {
         aria-label={isOpen ? "Close chat" : "Open chat"}
         style={!isOpen ? { padding: 0, overflow: "hidden" } : {}}
       >
-        {isOpen ? <CloseIcon /> : <img src="/src/assets/SK-logo-new.jpg" alt="Chat" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+        {isOpen ? <CloseIcon /> : <img src={logoNew} alt="Chat" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
         {showUnread && !isOpen && <span className="skw-chat-unread" />}
       </button>
 

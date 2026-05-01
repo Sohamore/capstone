@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoNew from "../assets/SK-logo-new.jpg";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -20,7 +21,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="skw-footer-brand">
             <Link to="/" className="skw-footer-logo">
-              <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna SteelWorks" style={{ height: "60px", width: "60px", objectFit: "cover", borderRadius: "50%", background: "#fff" }} />
+              <img src={logoNew} alt="ShriKrishna SteelWorks" style={{ height: "60px", width: "60px", objectFit: "cover", borderRadius: "50%", background: "#fff" }} />
             </Link>
             <p className="skw-footer-tagline">
               Maharashtra's most trusted industrial steel supplier and project contractor since 2006.

@@ -1,6 +1,7 @@
 // src/pages/Auth.tsx  —  Unified single login (no admin/user tabs)
 // Role is determined silently by the backend based on registered email.
 import { useEffect, useRef, useState, useCallback } from "react";
+import logoNew from "../assets/SK-logo-new.jpg";
 import { useNavigate } from "react-router-dom";
 import {
   signIn, signUp, signInWithGoogle, resetPassword,
@@ -77,7 +78,7 @@ function VisualPanel() {
         <div className="av-dot av-dot--3" />
       </div>
       <div className="av-brand">
-        <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna SteelWorks" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "50%", marginBottom: "1.5rem", background: "#fff" }} />
+        <img src={logoNew} alt="ShriKrishna SteelWorks" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "50%", marginBottom: "1.5rem", background: "#fff" }} />
         <div className="av-badge">
           <span className="av-badge-dot" />Customer Portal
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import logoNew from "../../assets/SK-logo-new.jpg";
 
 const API = "http://localhost:5000";
 
@@ -382,7 +383,7 @@ export default function ChatWidget() {
       {!isOpen && (
         <div style={{ position: "fixed", bottom: "26px", right: "26px", zIndex: 10001 }}>
           <button className="kb-btn" onClick={() => setIsOpen(true)} aria-label="Open Chat">
-            <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna" style={{ borderRadius: "50%" }} />
+            <img src={logoNew} alt="ShriKrishna" style={{ borderRadius: "50%" }} />
           </button>
           {unreadCount > 0 && <div className="kb-badge">{unreadCount}</div>}
         </div>
@@ -394,7 +395,7 @@ export default function ChatWidget() {
 
           {/* Header */}
           <div className="kb-header">
-            <img src="/src/assets/SK-logo-new.jpg" alt="SK" className="kb-avatar" style={{ borderRadius: "50%", objectFit: "cover" }} />
+            <img src={logoNew} alt="SK" className="kb-avatar" style={{ borderRadius: "50%", objectFit: "cover" }} />
             <div className="kb-hinfo">
               <div className="kb-hname">Krishna · Steel Assistant</div>
               <div className="kb-hstatus">
