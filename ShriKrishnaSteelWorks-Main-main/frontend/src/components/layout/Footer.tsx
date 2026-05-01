@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logoNew from "../assets/SK-logo-new.jpg";
+import logoNew from "../../assets/SK-logo-new.jpg";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
