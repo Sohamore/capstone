@@ -382,7 +382,7 @@ export default function ChatWidget() {
       {!isOpen && (
         <div style={{ position: "fixed", bottom: "26px", right: "26px", zIndex: 10001 }}>
           <button className="kb-btn" onClick={() => setIsOpen(true)} aria-label="Open Chat">
-            <img src="/src/assets/SK-logo.png" alt="ShriKrishna" />
+            <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna" style={{ borderRadius: "50%" }} />
           </button>
           {unreadCount > 0 && <div className="kb-badge">{unreadCount}</div>}
         </div>
@@ -394,7 +394,7 @@ export default function ChatWidget() {
 
           {/* Header */}
           <div className="kb-header">
-            <img src="/src/assets/SK-logo.png" alt="SK" className="kb-avatar" />
+            <img src="/src/assets/SK-logo-new.jpg" alt="SK" className="kb-avatar" style={{ borderRadius: "50%", objectFit: "cover" }} />
             <div className="kb-hinfo">
               <div className="kb-hname">Krishna · Steel Assistant</div>
               <div className="kb-hstatus">

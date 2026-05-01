@@ -99,6 +99,10 @@ const [cartCount] = useState(0);
         {/* Logo */}
         <Link to="/" className="skw-nav-logo">
           <img src={logo} alt="ShriKrishna SteelWorks" className="h-12 w-auto object-contain" />
+          <div className="skw-logo-text">
+            <span className="skw-logo-main">Shri Krishna</span>
+            <span className="skw-logo-sub">Steel Works</span>
+          </div>
         </Link>
 
         {/* Desktop Links */}

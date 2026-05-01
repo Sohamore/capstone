@@ -77,7 +77,7 @@ function VisualPanel() {
         <div className="av-dot av-dot--3" />
       </div>
       <div className="av-brand">
-        <img src="/src/assets/SK-logo.png" alt="ShriKrishna SteelWorks" style={{ maxWidth: "220px", marginBottom: "1rem" }} />
+        <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna SteelWorks" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "50%", marginBottom: "1.5rem", background: "#fff" }} />
         <div className="av-badge">
           <span className="av-badge-dot" />Customer Portal
         </div>

@@ -20,11 +20,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="skw-footer-brand">
             <Link to="/" className="skw-footer-logo">
-              <div className="skw-footer-logo-icon">K</div>
-              <div className="skw-footer-logo-text">
-                <span className="skw-footer-logo-main">ShriKrishna</span>
-                <span className="skw-footer-logo-sub">SteelWorks</span>
-              </div>
+              <img src="/src/assets/SK-logo-new.jpg" alt="ShriKrishna SteelWorks" style={{ height: "60px", width: "60px", objectFit: "cover", borderRadius: "50%", background: "#fff" }} />
             </Link>
             <p className="skw-footer-tagline">
               Maharashtra's most trusted industrial steel supplier and project contractor since 2006.

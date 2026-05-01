@@ -529,8 +529,9 @@ export default function ChatBot() {
         onClick={isOpen ? close : open}
         title={isOpen ? "Close chat" : "Chat with KrishnaBot AI"}
         aria-label={isOpen ? "Close chat" : "Open chat"}
+        style={!isOpen ? { padding: 0, overflow: "hidden" } : {}}
       >
-        {isOpen ? <CloseIcon /> : <ChatIcon />}
+        {isOpen ? <CloseIcon /> : <img src="/src/assets/SK-logo-new.jpg" alt="Chat" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
         {showUnread && !isOpen && <span className="skw-chat-unread" />}
       </button>
 
