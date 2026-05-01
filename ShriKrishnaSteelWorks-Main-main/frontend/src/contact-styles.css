@@ -34,7 +34,7 @@
 }
 .ctc-hero-bg {
   position: absolute; inset: -12%;
-  background-image: url('https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=1400&q=80');
+  background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356f12?auto=format&fit=crop&w=1400&q=80');
   background-size: cover; background-position: center;
   will-change: transform;
 }
