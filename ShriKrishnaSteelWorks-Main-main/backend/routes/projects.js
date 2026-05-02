@@ -105,8 +105,28 @@ router.post("/", async (req, res) => {
 // PUT update
 router.put("/:id", async (req, res) => {
   try {
+    const oldProject = await Project.findById(req.params.id);
+    if (!oldProject) return res.status(404).json({ message: "Not found" });
+
     const project = await Project.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
-    if (!project) return res.status(404).json({ message: "Not found" });
+    
+    // Check if status changed or admin notes were added/changed
+    const statusChanged = oldProject.status !== project.status;
+    const notesChanged = project.adminNotes && oldProject.adminNotes !== project.adminNotes;
+    
+    if ((statusChanged || notesChanged) && project.userUid) {
+      import("../models/User.js").then(async ({ default: User }) => {
+        const user = await User.findOne({ firebaseUid: project.userUid });
+        if (user && user.email) {
+          import("../utils/emailService.js").then(({ sendProjectUpdateEmail }) => {
+            // Only send notes if they actually changed, to avoid repeating them if only status changed
+            const notesToSend = notesChanged ? project.adminNotes : null;
+            sendProjectUpdateEmail(user.email, project, project.status, notesToSend);
+          }).catch(err => console.error("Failed to load emailService", err));
+        }
+      });
+    }
+
     res.json(project);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

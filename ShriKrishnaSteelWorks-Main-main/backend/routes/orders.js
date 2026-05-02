@@ -48,12 +48,27 @@ router.post("/", async (req, res) => {
 // ── PUT /api/orders/:orderId/status — update order status ────────────────────
 router.put("/:orderId/status", async (req, res) => {
   try {
+    const oldOrder = await Order.findOne({ orderId: req.params.orderId });
+    if (!oldOrder) return res.status(404).json({ message: "Order not found" });
+
+    const newStatus = req.body.status;
     const order = await Order.findOneAndUpdate(
       { orderId: req.params.orderId },
-      { status: req.body.status },
+      { status: newStatus },
       { new: true }
     );
-    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (oldOrder.status !== newStatus) {
+      import("../models/User.js").then(async ({ default: User }) => {
+        const user = await User.findOne({ firebaseUid: order.firebaseUid });
+        if (user && user.email) {
+          import("../utils/emailService.js").then(({ sendOrderUpdateEmail }) => {
+            sendOrderUpdateEmail(user.email, order, newStatus);
+          }).catch(err => console.error("Failed to load emailService", err));
+        }
+      });
+    }
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });

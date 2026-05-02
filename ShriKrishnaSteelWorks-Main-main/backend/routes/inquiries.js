@@ -71,7 +71,21 @@ router.post("/", async (req, res) => {
 // Update an inquiry (Admin responding)
 router.put("/:id", async (req, res) => {
   try {
+    const inquiry = await Inquiry.findById(req.params.id);
+    if (!inquiry) return res.status(404).json({ error: "Not found" });
+
+    const wasPending = inquiry.status === "Pending";
+    const oldResponse = inquiry.adminResponse;
+
     const updated = await Inquiry.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+    // Check if we need to send an email
+    if (updated.email && updated.adminResponse && (updated.adminResponse !== oldResponse || (wasPending && updated.status === "Responded"))) {
+      import("../utils/emailService.js").then(({ sendInquiryResponseEmail }) => {
+        sendInquiryResponseEmail(updated.email, updated, updated.adminResponse);
+      }).catch(err => console.error("Failed to load emailService", err));
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

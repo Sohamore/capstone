@@ -219,4 +219,4 @@ export const createInquiry = (data: Partial<MongoInquiry>) =>
 
 // Update inquiry status/response (Admin)
 export const updateInquiry = (id: string, updates: Partial<MongoInquiry>) =>
-  request<MongoInquiry>(`/inquiries/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+  request<MongoInquiry>(`/inquiries/${id}`, { method: "PUT", body: JSON.stringify(updates) });
