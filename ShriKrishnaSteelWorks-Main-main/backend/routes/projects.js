@@ -92,12 +92,38 @@ router.get("/:id", async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// GET projects by user email or uid
+router.get("/user/:emailOrUid", async (req, res) => {
+  try {
+    const term = req.params.emailOrUid;
+    const filter = {
+      $or: [
+        { clientEmail: term },
+        { userUid: term }
+      ]
+    };
+    const projects = await Project.find(filter).sort({ createdAt: -1 });
+    res.json(projects);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 // POST create
 router.post("/", async (req, res) => {
   try {
+    const payload = { ...req.body };
+    
+    // Auto-link to existing user if clientEmail is provided
+    if (payload.clientEmail && !payload.userUid) {
+      const { default: User } = await import("../models/User.js");
+      const user = await User.findOne({ email: payload.clientEmail });
+      if (user) {
+        payload.userUid = user.firebaseUid;
+      }
+    }
+
     const count     = await Project.countDocuments();
     const projectId = `PRJ-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
-    const project   = await Project.create({ projectId, ...req.body });
+    const project   = await Project.create({ projectId, ...payload });
     res.status(201).json(project);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

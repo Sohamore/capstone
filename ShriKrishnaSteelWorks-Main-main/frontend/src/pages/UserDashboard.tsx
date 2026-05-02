@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { logOut } from "../services/firebase";
-import { getUser, getUserOrders, updateUser, getUserInquiries } from "../services/api";
-import type { MongoUser, MongoOrder, MongoInquiry } from "../services/api";
+import { getUser, getUserOrders, updateUser, getUserInquiries, getUserProjectsByEmail } from "../services/api";
+import type { MongoUser, MongoOrder, MongoInquiry, MongoProject } from "../services/api";
 
-type Tab = "overview" | "orders" | "quotations" | "profile" | "settings";
+type Tab = "overview" | "orders" | "projects" | "quotations" | "profile" | "settings";
 type EditForm = {
   name: string; phone: string; company: string;
   street: string; city: string; state: string; pincode: string;
@@ -583,6 +583,7 @@ export default function UserDashboard() {
   const [mu,    setMU]    = useState<MongoUser|null>(null);
   const [ords,  setOrds]  = useState<MongoOrder[]>([]);
   const [inquiries, setInquiries] = useState<MongoInquiry[]>([]);
+  const [projects, setProjects] = useState<MongoProject[]>([]);
   const [load,  setLoad]  = useState(true);
   const [exp,   setExp]   = useState<string|null>(null);
   const [toast, setToast] = useState("");
@@ -614,6 +615,9 @@ export default function UserDashboard() {
     }).finally(()=>setLoad(false));
     getUserOrders(user.uid).then(setOrds).catch(()=>{});
     getUserInquiries(user.uid).then(setInquiries).catch(()=>{});
+    if (user.email) {
+      getUserProjectsByEmail(user.email).then(setProjects).catch(()=>{});
+    }
   },[user?.uid]);
 
   const toast$ = (m:string)=>{setToast(m);setTimeout(()=>setToast(""),3000);};
@@ -648,6 +652,7 @@ export default function UserDashboard() {
   const TABS = [
     {id:"overview"   as Tab, label:"Overview",     icon:"▣"},
     {id:"orders"     as Tab, label:"Orders",       icon:"⊞", badge:allOrds.length},
+    {id:"projects"   as Tab, label:"Projects",     icon:"🏗", badge:projects.length},
     {id:"quotations" as Tab, label:"Quotations",   icon:"☰", badge:inquiries.length},
     {id:"profile"    as Tab, label:"Profile",      icon:"◯"},
     {id:"settings"   as Tab, label:"Settings",     icon:"◎"},
@@ -656,6 +661,7 @@ export default function UserDashboard() {
   const HDR:{[K in Tab]:{title:string;sub:string}} = {
     overview:  {title:`Good to see you, ${name.split(" ")[0]}`,  sub:"Here's everything about your account at a glance"},
     orders:    {title:"Your Orders",      sub:"Real-time order status and delivery tracking"},
+    projects:  {title:"My Projects",      sub:"Track your ongoing steel projects and locations"},
     quotations:{title:"Quotation Requests", sub:"Track submitted quotes and their approvals"},
     profile:   {title:"My Profile",      sub:"Update your personal and delivery information"},
     settings:  {title:"Settings",        sub:"Manage notifications, preferences and security"},
@@ -699,6 +705,7 @@ export default function UserDashboard() {
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     {t.id==="overview"   && <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>}
                     {t.id==="orders"     && <><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></>}
+                    {t.id==="projects"   && <><path d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 21v-4a2 2 0 012-2h2a2 2 0 012 2v4M9 7h6M9 11h6M9 15h6"/></>}
                     {t.id==="quotations" && <><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></>}
                     {t.id==="profile"    && <><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></>}
                     {t.id==="settings"   && <><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0..."/><circle cx="12" cy="12" r="3"/></>}
@@ -816,6 +823,53 @@ export default function UserDashboard() {
                 <div className="ud-ord-list">{allOrds.map(o=>(
                     <OrderItem key={o._id} order={o} expanded={exp===o._id} onToggle={()=>setExp(exp===o._id?null:o._id)}/>
                   ))}</div>
+              </div>
+            )}
+
+            {/* PROJECTS */}
+            {tab==="projects" && (
+              <div className="ud-card">
+                <div className="ud-card-title">My Assigned Projects ({projects.length})</div>
+                {projects.length === 0 ? (
+                  <div className="ud-empty">
+                    <div className="ud-empty-title">No projects assigned</div>
+                    <div className="ud-empty-sub">Admins will assign projects to you via your email address.</div>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                    {projects.map(p => (
+                      <div key={p._id} style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.08)", borderRadius: "12px", padding: "20px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                          <div>
+                            <div style={{ fontSize: "16px", fontWeight: "bold", color: "#fff", marginBottom: "4px" }}>{p.title}</div>
+                            <div style={{ fontSize: "13px", color: "#888" }}>
+                              {p.location}, {p.district}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#60A5FA", marginTop: "8px" }}>
+                              Assigned to: {p.client}
+                            </div>
+                          </div>
+                          <span className="ud-status-pill" style={{ background: "rgba(96,165,250,.1)", color: "#60A5FA", border: "1px solid rgba(96,165,250,.3)" }}>
+                            {p.status}
+                          </span>
+                        </div>
+                        {p.latitude && p.longitude && (
+                          <div style={{ marginTop: "16px", borderRadius: "8px", overflow: "hidden", border: "1px solid rgba(255,255,255,.08)" }}>
+                            <iframe 
+                              width="100%" 
+                              height="250" 
+                              src={`https://www.openstreetmap.org/export/embed.html?bbox=${p.longitude-0.02},${p.latitude-0.02},${p.longitude+0.02},${p.latitude+0.02}&layer=mapnik&marker=${p.latitude},${p.longitude}`} 
+                              style={{ border: 0, display: "block" }} 
+                            />
+                            <div style={{ background: "rgba(0,0,0,.5)", padding: "8px 12px", fontSize: "11px", color: "#888" }}>
+                              Interactive Site Location Map
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

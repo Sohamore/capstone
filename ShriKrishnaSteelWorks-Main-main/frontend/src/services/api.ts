@@ -220,3 +220,44 @@ export const createInquiry = (data: Partial<MongoInquiry>) =>
 // Update inquiry status/response (Admin)
 export const updateInquiry = (id: string, updates: Partial<MongoInquiry>) =>
   request<MongoInquiry>(`/inquiries/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+
+// ── Projects API ──────────────────────────────────────────────────────────────
+
+export interface MongoProject {
+  _id: string;
+  projectId: string;
+  title: string;
+  name?: string;
+  category: string;
+  client: string;
+  clientEmail?: string;
+  userUid?: string;
+  adminNotes?: string;
+  location: string;
+  district: string;
+  latitude?: number;
+  longitude?: number;
+  status: "Pending Request" | "Negotiating" | "Planning" | "Ongoing" | "In Progress" | "Completed" | "On Hold";
+  description?: string;
+  startDate?: string;
+  targetDate?: string;
+  endDate?: string;
+  budget?: string;
+  value?: number;
+  progress: number;
+  workers?: number;
+  steelUsed?: string;
+  area?: string;
+  images?: string[];
+  tags?: string[];
+  highlights?: string[];
+  featured?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getAllProjects = () => request<MongoProject[]>("/projects");
+export const createProject = (data: Partial<MongoProject>) => request<MongoProject>("/projects", { method: "POST", body: JSON.stringify(data) });
+export const updateProject = (id: string, updates: Partial<MongoProject>) => request<MongoProject>(`/projects/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+export const deleteProject = (id: string) => request<{ message: string }>(`/projects/${id}`, { method: "DELETE" });
+export const getUserProjectsByEmail = (emailOrUid: string) => request<MongoProject[]>(`/projects/user/${encodeURIComponent(emailOrUid)}`);

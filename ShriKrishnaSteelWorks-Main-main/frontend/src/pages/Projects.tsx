@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getAllProjects } from "../services/api";
 
 // ─── InView Hook ─────────────────────────────────────────────────────────────
 function useInView(threshold = 0.08) {
@@ -21,7 +22,7 @@ function useInView(threshold = 0.08) {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
-  id: number;
+  id: string | number;
   name: string;
   location: string;
   district: string;
@@ -1218,6 +1219,7 @@ export default function Projects() {
   const { isAdmin } = useAuth();
   const showBudget = !!isAdmin;
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [allProjects, setAllProjects] = useState<Project[]>(PROJECTS);
   const [filter, setFilter] = useState<FilterState>({ search: "", status: "All", category: "All", view: "cards" });
   const heroBgRef = useRef<HTMLDivElement>(null);
 
@@ -1230,7 +1232,7 @@ export default function Projects() {
   const { ref: ctaRef,     inView: ctaInView     } = useInView(0.15);
 
   // Filtered projects
-  const filteredProjects = PROJECTS.filter(p => {
+  const filteredProjects = allProjects.filter(p => {
     const q = filter.search.toLowerCase();
     const matchSearch = !q || p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.client.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
     const matchStatus   = filter.status   === "All" || p.status   === filter.status;
@@ -1247,6 +1249,31 @@ export default function Projects() {
         heroBgRef.current.style.transform = `translateY(${window.scrollY * 0.32}px)`;
     };
     window.addEventListener("scroll", fn, { passive: true });
+
+    getAllProjects().then(dbProjects => {
+      const mapped: Project[] = dbProjects.map(dp => ({
+        id: dp._id as string,
+        name: dp.title,
+        location: dp.location || "",
+        district: dp.district || "",
+        category: dp.category || "Industrial",
+        budget: dp.budget || "N/A",
+        progress: dp.progress || 0,
+        status: dp.status === "Completed" ? "Completed" : dp.status === "Planning" ? "Planning" : "Ongoing",
+        workers: dp.workers || 0,
+        startDate: dp.startDate || "N/A",
+        targetDate: dp.targetDate || "N/A",
+        client: dp.client || "Client",
+        steelUsed: dp.steelUsed || "0 MT",
+        area: dp.area || "N/A",
+        images: dp.images && dp.images.length ? dp.images : ["/project-images/Industrial ShedA.jpg"],
+        tags: dp.tags && dp.tags.length ? dp.tags : ["SteelWorks"],
+        description: dp.description || "Project created by Admin.",
+        highlights: dp.highlights && dp.highlights.length ? dp.highlights : ["High quality structural steel"]
+      }));
+      setAllProjects([...PROJECTS, ...mapped]);
+    }).catch(console.error);
+
     return () => window.removeEventListener("scroll", fn);
   }, []);
 

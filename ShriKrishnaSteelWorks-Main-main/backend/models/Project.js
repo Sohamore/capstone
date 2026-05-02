@@ -6,9 +6,14 @@ const projectSchema = new mongoose.Schema({
   name:        { type: String },                         // alias
   category:    { type: String, default: "Industrial" },
   client:      { type: String, default: "" },
+  clientEmail: { type: String, default: "" },
+  userUid:     { type: String, default: "" },
+  adminNotes:  { type: String, default: "" },
+  latitude:    { type: Number, default: null },
+  longitude:   { type: Number, default: null },
   location:    { type: String, default: "" },
   district:    { type: String, default: "" },
-  status:      { type: String, enum: ["Planning","Ongoing","In Progress","Completed","On Hold"], default: "Planning" },
+  status:      { type: String, enum: ["Pending Request", "Negotiating", "Planning", "Ongoing", "In Progress", "Completed", "On Hold"], default: "Planning" },
   description: { type: String, default: "" },
   startDate:   { type: String, default: "" },           // "Jan 2024" format as shown on site
   targetDate:  { type: String, default: "" },           // "Oct 2025"

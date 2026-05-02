@@ -17,9 +17,12 @@ import {
   deleteProduct,
   getAllInquiries,
   updateInquiry,
+  getAllProjects,
+  createProject,
+  deleteProject,
 } from "../services/api";
 import type {
-  MongoUser, MongoOrder, MongoProduct, MongoInquiry,
+  MongoUser, MongoOrder, MongoProduct, MongoInquiry, MongoProject,
 } from "../services/api";
 import ProjectDetailModal from "../components/ProjectDetailModal";
 import type { ProjectDetailData } from "../components/ProjectDetailModal";
@@ -617,6 +620,7 @@ export default function AdminDashboard() {
   const [users,     setUsers]         = useState<MongoUser[]>([]);
   const [products,  setProducts]      = useState<MongoProduct[]>([]);
   const [inquiries, setInquiries]     = useState<MongoInquiry[]>([]);
+  const [dbProjects, setDbProjects]   = useState<MongoProject[]>([]);
   const [loadingUser,  setLoadingUser]    = useState(true);
   const [loadingOrders,setLoadingOrders]  = useState(true);
   const [error,        setError]          = useState("");
@@ -632,6 +636,10 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch]       = useState("");
   const [showCreateOrder, setShowCreateOrder] = useState(false);
   const [newOrder, setNewOrder]           = useState({ firebaseUid:"", product:"", quantity:"", amount:"" });
+  const [showCreateProject, setShowCreateProject] = useState(false);
+  const [newProject, setNewProject] = useState<Partial<MongoProject>>({
+    title: "", category: "Industrial", location: "", district: "", budget: "", workers: 0, status: "Planning", client: "", clientEmail: ""
+  });
 
   // Settings toggles
   const [settings, setSettings] = useState<DashboardSettings>({
@@ -673,16 +681,17 @@ export default function AdminDashboard() {
       .finally(() => setLoadingUser(false));
   }, [user?.uid]);
 
-  // Fetch all orders, users, products, and inquiries
+  // Fetch all orders, users, products, inquiries, and projects
   useEffect(() => {
     if (!user) return;
     setLoadingOrders(true);
-    Promise.all([getAllOrders(), getAllUsers(), getProducts(1, 200), getAllInquiries()])
-      .then(([ordersData, usersData, productsData, inquiriesData]) => {
+    Promise.all([getAllOrders(), getAllUsers(), getProducts(1, 200), getAllInquiries(), getAllProjects()])
+      .then(([ordersData, usersData, productsData, inquiriesData, projectsData]) => {
         setOrders(ordersData);
         setUsers(usersData);
         setProducts(productsData.products || []);
         setInquiries(inquiriesData);
+        setDbProjects(projectsData);
       })
       .catch(console.error)
       .finally(() => setLoadingOrders(false));
@@ -726,6 +735,38 @@ export default function AdminDashboard() {
       setNewOrder({ firebaseUid:"", product:"", quantity:"", amount:"" });
       showToast("✅ Order created!");
     } catch { showToast("❌ Failed to create order"); }
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProject.title || !newProject.district || !newProject.clientEmail) {
+      showToast("❌ Fill required fields (Title, District, Client Email)"); return;
+    }
+    const DISTRICT_COORDS: Record<string, [number, number]> = {
+      "nagpur": [21.1458, 79.0882], "pune": [18.5204, 73.8567], "mumbai": [19.0760, 72.8777],
+      "thane": [19.2183, 72.9781], "nashik": [19.9975, 73.7898], "aurangabad": [19.8762, 75.3433],
+      "solapur": [17.6599, 75.9064], "amravati": [20.9320, 77.7523], "kolhapur": [16.7050, 74.2433],
+    };
+    try {
+      const payload = { ...newProject };
+      const coords = DISTRICT_COORDS[(payload.district || "").toLowerCase()] || [19.75, 75.71];
+      payload.latitude = coords[0];
+      payload.longitude = coords[1];
+      
+      const created = await createProject(payload);
+      setDbProjects(prev => [created, ...prev]);
+      setShowCreateProject(false);
+      setNewProject({ title: "", category: "Industrial", location: "", district: "", budget: "", workers: 0, status: "Planning", client: "", clientEmail: "" });
+      showToast("✅ Project created and assigned!");
+    } catch { showToast("❌ Failed to create project"); }
+  };
+
+  const handleDeleteDbProject = async (id: string, title: string) => {
+    if (!window.confirm(`Delete project ${title}?`)) return;
+    try {
+      await deleteProject(id);
+      setDbProjects(prev => prev.filter(p => p._id !== id));
+      showToast("✅ Project deleted");
+    } catch { showToast("❌ Failed to delete project"); }
   };
 
   const handleRoleToggle = async (u: MongoUser) => {
@@ -1126,7 +1167,58 @@ export default function AdminDashboard() {
             {/* ── PROJECTS ──────────────────────────────────────────── */}
             {activeTab === "projects" && (
               <div className="glass-card">
-                <div className="card-title">🏗 All Projects ({MOCK_PROJECTS.length})</div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"15px", alignItems: "center" }}>
+                  <div className="card-title">🏗 Live Database Projects ({dbProjects.length})</div>
+                  <button className="btn-save" onClick={() => setShowCreateProject(!showCreateProject)}>
+                    {showCreateProject ? "✕ Close Form" : "+ Add Project"}
+                  </button>
+                </div>
+                
+                {showCreateProject && (
+                  <div style={{ marginBottom: 20, padding:16, background:"rgba(74,144,217,.05)", border:"1px solid rgba(74,144,217,.15)", borderRadius:12 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:"#4A90D9", marginBottom:10 }}>Create & Assign Project</div>
+                    <div className="edit-form-grid">
+                      <div className="form-field"><label className="form-label">Project Title</label><input className="form-input" value={newProject.title||""} onChange={e=>setNewProject({...newProject,title:e.target.value})} placeholder="e.g. Nagpur Warehouse" /></div>
+                      <div className="form-field"><label className="form-label">Client Name</label><input className="form-input" value={newProject.client||""} onChange={e=>setNewProject({...newProject,client:e.target.value})} placeholder="Mr. Sharma" /></div>
+                      <div className="form-field"><label className="form-label">Client Email (Important for App Access!)</label><input className="form-input" value={newProject.clientEmail||""} onChange={e=>setNewProject({...newProject,clientEmail:e.target.value})} placeholder="user@gmail.com" /></div>
+                      <div className="form-field"><label className="form-label">Location</label><input className="form-input" value={newProject.location||""} onChange={e=>setNewProject({...newProject,location:e.target.value})} placeholder="MIDC Hingna" /></div>
+                      <div className="form-field"><label className="form-label">District (Auto-Maps Lat/Long)</label><input className="form-input" value={newProject.district||""} onChange={e=>setNewProject({...newProject,district:e.target.value})} placeholder="Nagpur" /></div>
+                      <div className="form-field"><label className="form-label">Budget</label><input className="form-input" value={newProject.budget||""} onChange={e=>setNewProject({...newProject,budget:e.target.value})} placeholder="₹50,00,000" /></div>
+                    </div>
+                    <button className="btn-save" style={{ marginTop:14 }} onClick={handleCreateProject}>💾 Save Project</button>
+                  </div>
+                )}
+
+                {dbProjects.length > 0 ? (
+                  <div className="order-list">
+                    {dbProjects.map(p => (
+                      <div key={p._id} className="order-item" style={{ padding: "16px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                          <div>
+                            <div style={{ fontSize: "15px", fontWeight: "bold", color: "#fff" }}>{p.title}</div>
+                            <div style={{ fontSize: "12px", color: "#888", marginTop: "4px" }}>
+                              {p.location}, {p.district} • {p.client} ({p.clientEmail || "No email"})
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#4A90D9", marginTop: "4px" }}>
+                              Map Coordinates: {p.latitude?.toFixed(4)}, {p.longitude?.toFixed(4)}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                            <span className="product-status-pill" style={{ background: "rgba(74,144,217,.1)", color: "#4A90D9", border: "1px solid rgba(74,144,217,.3)" }}>
+                              {p.status}
+                            </span>
+                            <button onClick={() => handleDeleteDbProject(p._id, p.title)}
+                              style={{ background:"rgba(248,113,113,.08)", border:"1px solid rgba(248,113,113,.2)", color:"#F87171", padding:"5px 14px", borderRadius:8, fontSize:11, fontWeight:600, cursor:"pointer" }}>🗑 Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon="🏗" text="No projects found in database" />
+                )}
+
+                <div className="card-title" style={{ marginTop: 40 }}>🏗 Legacy Mock Projects ({MOCK_PROJECTS.length})</div>
                 <div className="projects-grid">
                   {MOCK_PROJECTS.map(p => (
                     <div key={p.id} style={{ position: "relative" }}>
